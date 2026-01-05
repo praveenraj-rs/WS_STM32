@@ -1,0 +1,534 @@
+
+ultrasonic.elf:     file format elf32-littlearm
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .isr_vector   00000198  08000000  08000000  00001000  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  1 .text         00000354  08000198  08000198  00001198  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  2 .rodata       00000000  080004ec  080004f4  000014f4  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  3 .ARM.extab    00000000  080004ec  080004ec  000014f4  2**0
+                  CONTENTS, READONLY
+  4 .ARM          00000000  080004ec  080004ec  000014f4  2**0
+                  CONTENTS, READONLY
+  5 .preinit_array 00000000  080004ec  080004f4  000014f4  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  6 .init_array   00000004  080004ec  080004ec  000014ec  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  7 .fini_array   00000004  080004f0  080004f0  000014f0  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  8 .data         00000000  20000000  20000000  000014f4  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  9 .bss          00000024  20000000  080004f4  00002000  2**2
+                  ALLOC
+ 10 ._user_heap_stack 00000604  20000024  080004f4  00002024  2**0
+                  ALLOC
+ 11 .ARM.attributes 00000030  00000000  00000000  000014f4  2**0
+                  CONTENTS, READONLY
+ 12 .debug_info   00000513  00000000  00000000  00001524  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 13 .debug_abbrev 0000017a  00000000  00000000  00001a37  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 14 .debug_aranges 00000078  00000000  00000000  00001bb8  2**3
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 15 .debug_rnglists 00000051  00000000  00000000  00001c30  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 16 .debug_macro  0000dbf8  00000000  00000000  00001c81  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 17 .debug_line   000006a4  00000000  00000000  0000f879  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 18 .debug_str    0004f857  00000000  00000000  0000ff1d  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 19 .comment      00000043  00000000  00000000  0005f774  2**0
+                  CONTENTS, READONLY
+ 20 .debug_frame  00000134  00000000  00000000  0005f7b8  2**2
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 21 .debug_line_str 00000061  00000000  00000000  0005f8ec  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+
+Disassembly of section .text:
+
+08000198 <__do_global_dtors_aux>:
+ 8000198:	b510      	push	{r4, lr}
+ 800019a:	4c05      	ldr	r4, [pc, #20]	@ (80001b0 <__do_global_dtors_aux+0x18>)
+ 800019c:	7823      	ldrb	r3, [r4, #0]
+ 800019e:	b933      	cbnz	r3, 80001ae <__do_global_dtors_aux+0x16>
+ 80001a0:	4b04      	ldr	r3, [pc, #16]	@ (80001b4 <__do_global_dtors_aux+0x1c>)
+ 80001a2:	b113      	cbz	r3, 80001aa <__do_global_dtors_aux+0x12>
+ 80001a4:	4804      	ldr	r0, [pc, #16]	@ (80001b8 <__do_global_dtors_aux+0x20>)
+ 80001a6:	f3af 8000 	nop.w
+ 80001aa:	2301      	movs	r3, #1
+ 80001ac:	7023      	strb	r3, [r4, #0]
+ 80001ae:	bd10      	pop	{r4, pc}
+ 80001b0:	20000000 	.word	0x20000000
+ 80001b4:	00000000 	.word	0x00000000
+ 80001b8:	080004d4 	.word	0x080004d4
+
+080001bc <frame_dummy>:
+ 80001bc:	b508      	push	{r3, lr}
+ 80001be:	4b03      	ldr	r3, [pc, #12]	@ (80001cc <frame_dummy+0x10>)
+ 80001c0:	b11b      	cbz	r3, 80001ca <frame_dummy+0xe>
+ 80001c2:	4903      	ldr	r1, [pc, #12]	@ (80001d0 <frame_dummy+0x14>)
+ 80001c4:	4803      	ldr	r0, [pc, #12]	@ (80001d4 <frame_dummy+0x18>)
+ 80001c6:	f3af 8000 	nop.w
+ 80001ca:	bd08      	pop	{r3, pc}
+ 80001cc:	00000000 	.word	0x00000000
+ 80001d0:	20000004 	.word	0x20000004
+ 80001d4:	080004d4 	.word	0x080004d4
+
+080001d8 <TIM2_Ultrasonic_Init>:
+
+volatile uint32_t echo_time_us = 0;
+volatile uint32_t distance_cm  = 0;
+
+
+void TIM2_Ultrasonic_Init(void) {
+ 80001d8:	b480      	push	{r7}
+ 80001da:	af00      	add	r7, sp, #0
+    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // Enable TIM2 clock
+ 80001dc:	4b10      	ldr	r3, [pc, #64]	@ (8000220 <TIM2_Ultrasonic_Init+0x48>)
+ 80001de:	6c1b      	ldr	r3, [r3, #64]	@ 0x40
+ 80001e0:	4a0f      	ldr	r2, [pc, #60]	@ (8000220 <TIM2_Ultrasonic_Init+0x48>)
+ 80001e2:	f043 0301 	orr.w	r3, r3, #1
+ 80001e6:	6413      	str	r3, [r2, #64]	@ 0x40
+
+    // PSC=15 (16-1) is logical for a 16MHz HSI clock
+    TIM2->PSC = (SysClk / 1000) - 1;
+ 80001e8:	f04f 4380 	mov.w	r3, #1073741824	@ 0x40000000
+ 80001ec:	f643 627f 	movw	r2, #15999	@ 0x3e7f
+ 80001f0:	629a      	str	r2, [r3, #40]	@ 0x28
+    TIM2->ARR = 0xFFFFFFFF; // ARR acts as a max ceiling and won't affect distance
+ 80001f2:	f04f 4380 	mov.w	r3, #1073741824	@ 0x40000000
+ 80001f6:	f04f 32ff 	mov.w	r2, #4294967295	@ 0xffffffff
+ 80001fa:	62da      	str	r2, [r3, #44]	@ 0x2c
+    TIM2->CNT = 0;
+ 80001fc:	f04f 4380 	mov.w	r3, #1073741824	@ 0x40000000
+ 8000200:	2200      	movs	r2, #0
+ 8000202:	625a      	str	r2, [r3, #36]	@ 0x24
+    TIM2->CR1 |= TIM_CR1_CEN; // Start Timer
+ 8000204:	f04f 4380 	mov.w	r3, #1073741824	@ 0x40000000
+ 8000208:	681b      	ldr	r3, [r3, #0]
+ 800020a:	f04f 4280 	mov.w	r2, #1073741824	@ 0x40000000
+ 800020e:	f043 0301 	orr.w	r3, r3, #1
+ 8000212:	6013      	str	r3, [r2, #0]
+}
+ 8000214:	bf00      	nop
+ 8000216:	46bd      	mov	sp, r7
+ 8000218:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 800021c:	4770      	bx	lr
+ 800021e:	bf00      	nop
+ 8000220:	40023800 	.word	0x40023800
+
+08000224 <TIM2_Ultrasonic_Delay_us>:
+
+void TIM2_Ultrasonic_Delay_us(uint32_t us) {
+ 8000224:	b480      	push	{r7}
+ 8000226:	b083      	sub	sp, #12
+ 8000228:	af00      	add	r7, sp, #0
+ 800022a:	6078      	str	r0, [r7, #4]
+    TIM2->CNT = 0;
+ 800022c:	f04f 4380 	mov.w	r3, #1073741824	@ 0x40000000
+ 8000230:	2200      	movs	r2, #0
+ 8000232:	625a      	str	r2, [r3, #36]	@ 0x24
+    while (TIM2->CNT < us); // Simple blocking delay
+ 8000234:	bf00      	nop
+ 8000236:	f04f 4380 	mov.w	r3, #1073741824	@ 0x40000000
+ 800023a:	6a5b      	ldr	r3, [r3, #36]	@ 0x24
+ 800023c:	687a      	ldr	r2, [r7, #4]
+ 800023e:	429a      	cmp	r2, r3
+ 8000240:	d8f9      	bhi.n	8000236 <TIM2_Ultrasonic_Delay_us+0x12>
+}
+ 8000242:	bf00      	nop
+ 8000244:	bf00      	nop
+ 8000246:	370c      	adds	r7, #12
+ 8000248:	46bd      	mov	sp, r7
+ 800024a:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 800024e:	4770      	bx	lr
+
+08000250 <TIM3_Delay_Init>:
+
+void TIM3_Delay_Init(void)
+{
+ 8000250:	b480      	push	{r7}
+ 8000252:	b083      	sub	sp, #12
+ 8000254:	af00      	add	r7, sp, #0
+    RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;		// Enable TIM3 Clock
+ 8000256:	4b09      	ldr	r3, [pc, #36]	@ (800027c <TIM3_Delay_Init+0x2c>)
+ 8000258:	6c1b      	ldr	r3, [r3, #64]	@ 0x40
+ 800025a:	4a08      	ldr	r2, [pc, #32]	@ (800027c <TIM3_Delay_Init+0x2c>)
+ 800025c:	f043 0302 	orr.w	r3, r3, #2
+ 8000260:	6413      	str	r3, [r2, #64]	@ 0x40
+    uint32_t prescaler = (SysClk / 1000) - 1;	// Timer clock = 1 KHz or 1ms
+ 8000262:	f643 637f 	movw	r3, #15999	@ 0x3e7f
+ 8000266:	607b      	str	r3, [r7, #4]
+    TIM3->PSC = prescaler;					// Pre-scaler update
+ 8000268:	4a05      	ldr	r2, [pc, #20]	@ (8000280 <TIM3_Delay_Init+0x30>)
+ 800026a:	687b      	ldr	r3, [r7, #4]
+ 800026c:	6293      	str	r3, [r2, #40]	@ 0x28
+}
+ 800026e:	bf00      	nop
+ 8000270:	370c      	adds	r7, #12
+ 8000272:	46bd      	mov	sp, r7
+ 8000274:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8000278:	4770      	bx	lr
+ 800027a:	bf00      	nop
+ 800027c:	40023800 	.word	0x40023800
+ 8000280:	40000400 	.word	0x40000400
+
+08000284 <TIM3_Delay_ms>:
+
+void TIM3_Delay_ms(uint16_t delay_ms)
+{
+ 8000284:	b480      	push	{r7}
+ 8000286:	b083      	sub	sp, #12
+ 8000288:	af00      	add	r7, sp, #0
+ 800028a:	4603      	mov	r3, r0
+ 800028c:	80fb      	strh	r3, [r7, #6]
+    TIM3->ARR = delay_ms - 1;   			// Auto-reload 1 second delay (1ms * 999)
+ 800028e:	88fb      	ldrh	r3, [r7, #6]
+ 8000290:	1e5a      	subs	r2, r3, #1
+ 8000292:	4b18      	ldr	r3, [pc, #96]	@ (80002f4 <TIM3_Delay_ms+0x70>)
+ 8000294:	62da      	str	r2, [r3, #44]	@ 0x2c
+    TIM3->CNT = 0;							// Reset the counter
+ 8000296:	4b17      	ldr	r3, [pc, #92]	@ (80002f4 <TIM3_Delay_ms+0x70>)
+ 8000298:	2200      	movs	r2, #0
+ 800029a:	625a      	str	r2, [r3, #36]	@ 0x24
+    TIM3->EGR |= (1 << 0);  				// Event generation
+ 800029c:	4b15      	ldr	r3, [pc, #84]	@ (80002f4 <TIM3_Delay_ms+0x70>)
+ 800029e:	695b      	ldr	r3, [r3, #20]
+ 80002a0:	4a14      	ldr	r2, [pc, #80]	@ (80002f4 <TIM3_Delay_ms+0x70>)
+ 80002a2:	f043 0301 	orr.w	r3, r3, #1
+ 80002a6:	6153      	str	r3, [r2, #20]
+
+    TIM3->SR &= ~ (1 << 0);  				// Clear update interrupt flag
+ 80002a8:	4b12      	ldr	r3, [pc, #72]	@ (80002f4 <TIM3_Delay_ms+0x70>)
+ 80002aa:	691b      	ldr	r3, [r3, #16]
+ 80002ac:	4a11      	ldr	r2, [pc, #68]	@ (80002f4 <TIM3_Delay_ms+0x70>)
+ 80002ae:	f023 0301 	bic.w	r3, r3, #1
+ 80002b2:	6113      	str	r3, [r2, #16]
+    TIM3->CR1 |= (1 << 0); 				// Enable Timer
+ 80002b4:	4b0f      	ldr	r3, [pc, #60]	@ (80002f4 <TIM3_Delay_ms+0x70>)
+ 80002b6:	681b      	ldr	r3, [r3, #0]
+ 80002b8:	4a0e      	ldr	r2, [pc, #56]	@ (80002f4 <TIM3_Delay_ms+0x70>)
+ 80002ba:	f043 0301 	orr.w	r3, r3, #1
+ 80002be:	6013      	str	r3, [r2, #0]
+
+    while (!(TIM3->SR & (1 << 0))){} 		// Until UIF NEQ 1
+ 80002c0:	bf00      	nop
+ 80002c2:	4b0c      	ldr	r3, [pc, #48]	@ (80002f4 <TIM3_Delay_ms+0x70>)
+ 80002c4:	691b      	ldr	r3, [r3, #16]
+ 80002c6:	f003 0301 	and.w	r3, r3, #1
+ 80002ca:	2b00      	cmp	r3, #0
+ 80002cc:	d0f9      	beq.n	80002c2 <TIM3_Delay_ms+0x3e>
+    TIM3->SR &= ~(1 << 0); 				//UIF is cleared manually
+ 80002ce:	4b09      	ldr	r3, [pc, #36]	@ (80002f4 <TIM3_Delay_ms+0x70>)
+ 80002d0:	691b      	ldr	r3, [r3, #16]
+ 80002d2:	4a08      	ldr	r2, [pc, #32]	@ (80002f4 <TIM3_Delay_ms+0x70>)
+ 80002d4:	f023 0301 	bic.w	r3, r3, #1
+ 80002d8:	6113      	str	r3, [r2, #16]
+    TIM3->CR1 &= ~(1 << 0); 				//CEN is cleared
+ 80002da:	4b06      	ldr	r3, [pc, #24]	@ (80002f4 <TIM3_Delay_ms+0x70>)
+ 80002dc:	681b      	ldr	r3, [r3, #0]
+ 80002de:	4a05      	ldr	r2, [pc, #20]	@ (80002f4 <TIM3_Delay_ms+0x70>)
+ 80002e0:	f023 0301 	bic.w	r3, r3, #1
+ 80002e4:	6013      	str	r3, [r2, #0]
+}
+ 80002e6:	bf00      	nop
+ 80002e8:	370c      	adds	r7, #12
+ 80002ea:	46bd      	mov	sp, r7
+ 80002ec:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 80002f0:	4770      	bx	lr
+ 80002f2:	bf00      	nop
+ 80002f4:	40000400 	.word	0x40000400
+
+080002f8 <GPIO_Ultrasonic_Init>:
+
+void GPIO_Ultrasonic_Init(void) {
+ 80002f8:	b480      	push	{r7}
+ 80002fa:	af00      	add	r7, sp, #0
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN; // Enable GPIOB clock
+ 80002fc:	4b14      	ldr	r3, [pc, #80]	@ (8000350 <GPIO_Ultrasonic_Init+0x58>)
+ 80002fe:	6b1b      	ldr	r3, [r3, #48]	@ 0x30
+ 8000300:	4a13      	ldr	r2, [pc, #76]	@ (8000350 <GPIO_Ultrasonic_Init+0x58>)
+ 8000302:	f043 0302 	orr.w	r3, r3, #2
+ 8000306:	6313      	str	r3, [r2, #48]	@ 0x30
+
+    // PB12 -> TRIG (Output)
+    GPIOB->MODER &= ~(3U << (TRIG_PIN * 2));
+ 8000308:	4b12      	ldr	r3, [pc, #72]	@ (8000354 <GPIO_Ultrasonic_Init+0x5c>)
+ 800030a:	681b      	ldr	r3, [r3, #0]
+ 800030c:	4a11      	ldr	r2, [pc, #68]	@ (8000354 <GPIO_Ultrasonic_Init+0x5c>)
+ 800030e:	f023 7340 	bic.w	r3, r3, #50331648	@ 0x3000000
+ 8000312:	6013      	str	r3, [r2, #0]
+    GPIOB->MODER |=  (1U << (TRIG_PIN * 2));
+ 8000314:	4b0f      	ldr	r3, [pc, #60]	@ (8000354 <GPIO_Ultrasonic_Init+0x5c>)
+ 8000316:	681b      	ldr	r3, [r3, #0]
+ 8000318:	4a0e      	ldr	r2, [pc, #56]	@ (8000354 <GPIO_Ultrasonic_Init+0x5c>)
+ 800031a:	f043 7380 	orr.w	r3, r3, #16777216	@ 0x1000000
+ 800031e:	6013      	str	r3, [r2, #0]
+
+    // PB13 -> ECHO (Input) with Pull-Down to stabilize signal
+    GPIOB->MODER &= ~(3U << (ECHO_PIN * 2));
+ 8000320:	4b0c      	ldr	r3, [pc, #48]	@ (8000354 <GPIO_Ultrasonic_Init+0x5c>)
+ 8000322:	681b      	ldr	r3, [r3, #0]
+ 8000324:	4a0b      	ldr	r2, [pc, #44]	@ (8000354 <GPIO_Ultrasonic_Init+0x5c>)
+ 8000326:	f023 6340 	bic.w	r3, r3, #201326592	@ 0xc000000
+ 800032a:	6013      	str	r3, [r2, #0]
+    GPIOB->PUPDR &= ~(3U << (ECHO_PIN * 2));
+ 800032c:	4b09      	ldr	r3, [pc, #36]	@ (8000354 <GPIO_Ultrasonic_Init+0x5c>)
+ 800032e:	68db      	ldr	r3, [r3, #12]
+ 8000330:	4a08      	ldr	r2, [pc, #32]	@ (8000354 <GPIO_Ultrasonic_Init+0x5c>)
+ 8000332:	f023 6340 	bic.w	r3, r3, #201326592	@ 0xc000000
+ 8000336:	60d3      	str	r3, [r2, #12]
+    GPIOB->PUPDR |=  (2U << (ECHO_PIN * 2));
+ 8000338:	4b06      	ldr	r3, [pc, #24]	@ (8000354 <GPIO_Ultrasonic_Init+0x5c>)
+ 800033a:	68db      	ldr	r3, [r3, #12]
+ 800033c:	4a05      	ldr	r2, [pc, #20]	@ (8000354 <GPIO_Ultrasonic_Init+0x5c>)
+ 800033e:	f043 6300 	orr.w	r3, r3, #134217728	@ 0x8000000
+ 8000342:	60d3      	str	r3, [r2, #12]
+}
+ 8000344:	bf00      	nop
+ 8000346:	46bd      	mov	sp, r7
+ 8000348:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 800034c:	4770      	bx	lr
+ 800034e:	bf00      	nop
+ 8000350:	40023800 	.word	0x40023800
+ 8000354:	40020400 	.word	0x40020400
+
+08000358 <Ultrasonic_Read_us>:
+
+/* ================= ULTRASONIC READ ================= */
+uint32_t Ultrasonic_Read_us(void) {
+ 8000358:	b580      	push	{r7, lr}
+ 800035a:	b082      	sub	sp, #8
+ 800035c:	af00      	add	r7, sp, #0
+    uint32_t timeout;
+
+    // Send 10us Trigger Pulse
+    GPIOB->BSRR = (1U << (TRIG_PIN + 16)); // LOW
+ 800035e:	4b1f      	ldr	r3, [pc, #124]	@ (80003dc <Ultrasonic_Read_us+0x84>)
+ 8000360:	f04f 5280 	mov.w	r2, #268435456	@ 0x10000000
+ 8000364:	619a      	str	r2, [r3, #24]
+    TIM2_Ultrasonic_Delay_us(2);
+ 8000366:	2002      	movs	r0, #2
+ 8000368:	f7ff ff5c 	bl	8000224 <TIM2_Ultrasonic_Delay_us>
+    GPIOB->BSRR = (1U << TRIG_PIN);        // HIGH
+ 800036c:	4b1b      	ldr	r3, [pc, #108]	@ (80003dc <Ultrasonic_Read_us+0x84>)
+ 800036e:	f44f 5280 	mov.w	r2, #4096	@ 0x1000
+ 8000372:	619a      	str	r2, [r3, #24]
+    TIM2_Ultrasonic_Delay_us(10);
+ 8000374:	200a      	movs	r0, #10
+ 8000376:	f7ff ff55 	bl	8000224 <TIM2_Ultrasonic_Delay_us>
+    GPIOB->BSRR = (1U << (TRIG_PIN + 16)); // LOW
+ 800037a:	4b18      	ldr	r3, [pc, #96]	@ (80003dc <Ultrasonic_Read_us+0x84>)
+ 800037c:	f04f 5280 	mov.w	r2, #268435456	@ 0x10000000
+ 8000380:	619a      	str	r2, [r3, #24]
+
+    // Wait for ECHO Rising Edge (with safety timeout)
+    timeout = 30000;
+ 8000382:	f247 5330 	movw	r3, #30000	@ 0x7530
+ 8000386:	607b      	str	r3, [r7, #4]
+    while (!(GPIOB->IDR & (1U << ECHO_PIN))) {
+ 8000388:	e007      	b.n	800039a <Ultrasonic_Read_us+0x42>
+        if (--timeout == 0) return 0;
+ 800038a:	687b      	ldr	r3, [r7, #4]
+ 800038c:	3b01      	subs	r3, #1
+ 800038e:	607b      	str	r3, [r7, #4]
+ 8000390:	687b      	ldr	r3, [r7, #4]
+ 8000392:	2b00      	cmp	r3, #0
+ 8000394:	d101      	bne.n	800039a <Ultrasonic_Read_us+0x42>
+ 8000396:	2300      	movs	r3, #0
+ 8000398:	e01c      	b.n	80003d4 <Ultrasonic_Read_us+0x7c>
+    while (!(GPIOB->IDR & (1U << ECHO_PIN))) {
+ 800039a:	4b10      	ldr	r3, [pc, #64]	@ (80003dc <Ultrasonic_Read_us+0x84>)
+ 800039c:	691b      	ldr	r3, [r3, #16]
+ 800039e:	f403 5300 	and.w	r3, r3, #8192	@ 0x2000
+ 80003a2:	2b00      	cmp	r3, #0
+ 80003a4:	d0f1      	beq.n	800038a <Ultrasonic_Read_us+0x32>
+    }
+
+    // Measure duration of HIGH pulse
+    TIM2->CNT = 0;
+ 80003a6:	f04f 4380 	mov.w	r3, #1073741824	@ 0x40000000
+ 80003aa:	2200      	movs	r2, #0
+ 80003ac:	625a      	str	r2, [r3, #36]	@ 0x24
+    while (GPIOB->IDR & (1U << ECHO_PIN)) {
+ 80003ae:	e006      	b.n	80003be <Ultrasonic_Read_us+0x66>
+        if (TIM2->CNT > 40000) break; // Hardware max limit check
+ 80003b0:	f04f 4380 	mov.w	r3, #1073741824	@ 0x40000000
+ 80003b4:	6a5b      	ldr	r3, [r3, #36]	@ 0x24
+ 80003b6:	f649 4240 	movw	r2, #40000	@ 0x9c40
+ 80003ba:	4293      	cmp	r3, r2
+ 80003bc:	d806      	bhi.n	80003cc <Ultrasonic_Read_us+0x74>
+    while (GPIOB->IDR & (1U << ECHO_PIN)) {
+ 80003be:	4b07      	ldr	r3, [pc, #28]	@ (80003dc <Ultrasonic_Read_us+0x84>)
+ 80003c0:	691b      	ldr	r3, [r3, #16]
+ 80003c2:	f403 5300 	and.w	r3, r3, #8192	@ 0x2000
+ 80003c6:	2b00      	cmp	r3, #0
+ 80003c8:	d1f2      	bne.n	80003b0 <Ultrasonic_Read_us+0x58>
+ 80003ca:	e000      	b.n	80003ce <Ultrasonic_Read_us+0x76>
+        if (TIM2->CNT > 40000) break; // Hardware max limit check
+ 80003cc:	bf00      	nop
+    }
+    return TIM2->CNT;
+ 80003ce:	f04f 4380 	mov.w	r3, #1073741824	@ 0x40000000
+ 80003d2:	6a5b      	ldr	r3, [r3, #36]	@ 0x24
+}
+ 80003d4:	4618      	mov	r0, r3
+ 80003d6:	3708      	adds	r7, #8
+ 80003d8:	46bd      	mov	sp, r7
+ 80003da:	bd80      	pop	{r7, pc}
+ 80003dc:	40020400 	.word	0x40020400
+
+080003e0 <main>:
+
+int main(void) {
+ 80003e0:	b580      	push	{r7, lr}
+ 80003e2:	af00      	add	r7, sp, #0
+
+    TIM2_Ultrasonic_Init();
+ 80003e4:	f7ff fef8 	bl	80001d8 <TIM2_Ultrasonic_Init>
+    TIM3_Delay_Init();
+ 80003e8:	f7ff ff32 	bl	8000250 <TIM3_Delay_Init>
+    GPIO_Ultrasonic_Init();
+ 80003ec:	f7ff ff84 	bl	80002f8 <GPIO_Ultrasonic_Init>
+
+    while (1) {
+        echo_time_us = Ultrasonic_Read_us();
+ 80003f0:	f7ff ffb2 	bl	8000358 <Ultrasonic_Read_us>
+ 80003f4:	4603      	mov	r3, r0
+ 80003f6:	4a0d      	ldr	r2, [pc, #52]	@ (800042c <main+0x4c>)
+ 80003f8:	6013      	str	r3, [r2, #0]
+        if (echo_time_us > 0) {
+ 80003fa:	4b0c      	ldr	r3, [pc, #48]	@ (800042c <main+0x4c>)
+ 80003fc:	681b      	ldr	r3, [r3, #0]
+ 80003fe:	2b00      	cmp	r3, #0
+ 8000400:	d00b      	beq.n	800041a <main+0x3a>
+            /* * CALIBRATION LOGIC:
+             * 28253 / 31 = ~911 ticks per cm.
+             * 4979 / 5 = ~995 ticks per cm.
+             * We use 925 as a balanced divisor.
+             */
+            distance_cm = echo_time_us / 925;
+ 8000402:	4b0a      	ldr	r3, [pc, #40]	@ (800042c <main+0x4c>)
+ 8000404:	681a      	ldr	r2, [r3, #0]
+ 8000406:	4b0a      	ldr	r3, [pc, #40]	@ (8000430 <main+0x50>)
+ 8000408:	fba3 1302 	umull	r1, r3, r3, r2
+ 800040c:	1ad2      	subs	r2, r2, r3
+ 800040e:	0852      	lsrs	r2, r2, #1
+ 8000410:	4413      	add	r3, r2
+ 8000412:	0a5b      	lsrs	r3, r3, #9
+ 8000414:	4a07      	ldr	r2, [pc, #28]	@ (8000434 <main+0x54>)
+ 8000416:	6013      	str	r3, [r2, #0]
+ 8000418:	e002      	b.n	8000420 <main+0x40>
+        } else {
+            distance_cm = 0;
+ 800041a:	4b06      	ldr	r3, [pc, #24]	@ (8000434 <main+0x54>)
+ 800041c:	2200      	movs	r2, #0
+ 800041e:	601a      	str	r2, [r3, #0]
+        }
+        TIM3_Delay_ms(1000);
+ 8000420:	f44f 707a 	mov.w	r0, #1000	@ 0x3e8
+ 8000424:	f7ff ff2e 	bl	8000284 <TIM3_Delay_ms>
+        echo_time_us = Ultrasonic_Read_us();
+ 8000428:	e7e2      	b.n	80003f0 <main+0x10>
+ 800042a:	bf00      	nop
+ 800042c:	2000001c 	.word	0x2000001c
+ 8000430:	1b661f8d 	.word	0x1b661f8d
+ 8000434:	20000020 	.word	0x20000020
+
+08000438 <Reset_Handler>:
+ 8000438:	480d      	ldr	r0, [pc, #52]	@ (8000470 <LoopForever+0x2>)
+ 800043a:	4685      	mov	sp, r0
+ 800043c:	f3af 8000 	nop.w
+ 8000440:	480c      	ldr	r0, [pc, #48]	@ (8000474 <LoopForever+0x6>)
+ 8000442:	490d      	ldr	r1, [pc, #52]	@ (8000478 <LoopForever+0xa>)
+ 8000444:	4a0d      	ldr	r2, [pc, #52]	@ (800047c <LoopForever+0xe>)
+ 8000446:	2300      	movs	r3, #0
+ 8000448:	e002      	b.n	8000450 <LoopCopyDataInit>
+
+0800044a <CopyDataInit>:
+ 800044a:	58d4      	ldr	r4, [r2, r3]
+ 800044c:	50c4      	str	r4, [r0, r3]
+ 800044e:	3304      	adds	r3, #4
+
+08000450 <LoopCopyDataInit>:
+ 8000450:	18c4      	adds	r4, r0, r3
+ 8000452:	428c      	cmp	r4, r1
+ 8000454:	d3f9      	bcc.n	800044a <CopyDataInit>
+ 8000456:	4a0a      	ldr	r2, [pc, #40]	@ (8000480 <LoopForever+0x12>)
+ 8000458:	4c0a      	ldr	r4, [pc, #40]	@ (8000484 <LoopForever+0x16>)
+ 800045a:	2300      	movs	r3, #0
+ 800045c:	e001      	b.n	8000462 <LoopFillZerobss>
+
+0800045e <FillZerobss>:
+ 800045e:	6013      	str	r3, [r2, #0]
+ 8000460:	3204      	adds	r2, #4
+
+08000462 <LoopFillZerobss>:
+ 8000462:	42a2      	cmp	r2, r4
+ 8000464:	d3fb      	bcc.n	800045e <FillZerobss>
+ 8000466:	f000 f811 	bl	800048c <__libc_init_array>
+ 800046a:	f7ff ffb9 	bl	80003e0 <main>
+
+0800046e <LoopForever>:
+ 800046e:	e7fe      	b.n	800046e <LoopForever>
+ 8000470:	20020000 	.word	0x20020000
+ 8000474:	20000000 	.word	0x20000000
+ 8000478:	20000000 	.word	0x20000000
+ 800047c:	080004f4 	.word	0x080004f4
+ 8000480:	20000000 	.word	0x20000000
+ 8000484:	20000024 	.word	0x20000024
+
+08000488 <ADC_IRQHandler>:
+ 8000488:	e7fe      	b.n	8000488 <ADC_IRQHandler>
+	...
+
+0800048c <__libc_init_array>:
+ 800048c:	b570      	push	{r4, r5, r6, lr}
+ 800048e:	4d0d      	ldr	r5, [pc, #52]	@ (80004c4 <__libc_init_array+0x38>)
+ 8000490:	4c0d      	ldr	r4, [pc, #52]	@ (80004c8 <__libc_init_array+0x3c>)
+ 8000492:	1b64      	subs	r4, r4, r5
+ 8000494:	10a4      	asrs	r4, r4, #2
+ 8000496:	2600      	movs	r6, #0
+ 8000498:	42a6      	cmp	r6, r4
+ 800049a:	d109      	bne.n	80004b0 <__libc_init_array+0x24>
+ 800049c:	4d0b      	ldr	r5, [pc, #44]	@ (80004cc <__libc_init_array+0x40>)
+ 800049e:	4c0c      	ldr	r4, [pc, #48]	@ (80004d0 <__libc_init_array+0x44>)
+ 80004a0:	f000 f818 	bl	80004d4 <_init>
+ 80004a4:	1b64      	subs	r4, r4, r5
+ 80004a6:	10a4      	asrs	r4, r4, #2
+ 80004a8:	2600      	movs	r6, #0
+ 80004aa:	42a6      	cmp	r6, r4
+ 80004ac:	d105      	bne.n	80004ba <__libc_init_array+0x2e>
+ 80004ae:	bd70      	pop	{r4, r5, r6, pc}
+ 80004b0:	f855 3b04 	ldr.w	r3, [r5], #4
+ 80004b4:	4798      	blx	r3
+ 80004b6:	3601      	adds	r6, #1
+ 80004b8:	e7ee      	b.n	8000498 <__libc_init_array+0xc>
+ 80004ba:	f855 3b04 	ldr.w	r3, [r5], #4
+ 80004be:	4798      	blx	r3
+ 80004c0:	3601      	adds	r6, #1
+ 80004c2:	e7f2      	b.n	80004aa <__libc_init_array+0x1e>
+ 80004c4:	080004ec 	.word	0x080004ec
+ 80004c8:	080004ec 	.word	0x080004ec
+ 80004cc:	080004ec 	.word	0x080004ec
+ 80004d0:	080004f0 	.word	0x080004f0
+
+080004d4 <_init>:
+ 80004d4:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+ 80004d6:	bf00      	nop
+ 80004d8:	bcf8      	pop	{r3, r4, r5, r6, r7}
+ 80004da:	bc08      	pop	{r3}
+ 80004dc:	469e      	mov	lr, r3
+ 80004de:	4770      	bx	lr
+
+080004e0 <_fini>:
+ 80004e0:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+ 80004e2:	bf00      	nop
+ 80004e4:	bcf8      	pop	{r3, r4, r5, r6, r7}
+ 80004e6:	bc08      	pop	{r3}
+ 80004e8:	469e      	mov	lr, r3
+ 80004ea:	4770      	bx	lr
