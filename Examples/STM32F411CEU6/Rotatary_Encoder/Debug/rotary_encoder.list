@@ -35,17 +35,17 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  15 .debug_rnglists 0000003a  00000000  00000000  00001ac0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  0000dbce  00000000  00000000  00001afa  2**0
+ 16 .debug_macro  0000dbe6  00000000  00000000  00001afa  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   000005e5  00000000  00000000  0000f6c8  2**0
+ 17 .debug_line   000005bd  00000000  00000000  0000f6e0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    0004f76f  00000000  00000000  0000fcad  2**0
+ 18 .debug_str    0004f7ab  00000000  00000000  0000fc9d  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  0005f41c  2**0
+ 19 .comment      00000043  00000000  00000000  0005f448  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  0000009c  00000000  00000000  0005f460  2**2
+ 20 .debug_frame  0000009c  00000000  00000000  0005f48c  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000075  00000000  00000000  0005f4fc  2**0
+ 21 .debug_line_str 00000075  00000000  00000000  0005f528  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -79,14 +79,15 @@ Disassembly of section .text:
  80001d4:	08000408 	.word	0x08000408
 
 080001d8 <GPIO_Encoder_Init>:
-volatile uint8_t encoder_value = 0;   // WATCH THIS (0–20)
-static uint16_t last_cnt = 0;
-
-/* ================= GPIO INIT ================= */
+- AF1 (TIM1)
+- Internal Pull-up enabled (important for KY-040)
+===============================================================================
+*/
 void GPIO_Encoder_Init(void)
 {
  80001d8:	b480      	push	{r7}
  80001da:	af00      	add	r7, sp, #0
+    /* Enable GPIOA peripheral clock */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
  80001dc:	4b17      	ldr	r3, [pc, #92]	@ (800023c <GPIO_Encoder_Init+0x64>)
  80001de:	6b1b      	ldr	r3, [r3, #48]	@ 0x30
@@ -94,42 +95,46 @@ void GPIO_Encoder_Init(void)
  80001e2:	f043 0301 	orr.w	r3, r3, #1
  80001e6:	6313      	str	r3, [r2, #48]	@ 0x30
 
-    /* PA8, PA9 → Alternate Function */
-    GPIOA->MODER &= ~((3U << (8 * 2)) | (3U << (9 * 2)));
+    /* Set PA8 and PA9 to Alternate Function mode (MODER = 10)
+       Each pin uses 2 bits in MODER register */
+    GPIOA->MODER &= ~((3U << (8 * 2)) | (3U << (9 * 2)));  // Clear mode bits
  80001e8:	4b15      	ldr	r3, [pc, #84]	@ (8000240 <GPIO_Encoder_Init+0x68>)
  80001ea:	681b      	ldr	r3, [r3, #0]
  80001ec:	4a14      	ldr	r2, [pc, #80]	@ (8000240 <GPIO_Encoder_Init+0x68>)
  80001ee:	f423 2370 	bic.w	r3, r3, #983040	@ 0xf0000
  80001f2:	6013      	str	r3, [r2, #0]
-    GPIOA->MODER |=  ((2U << (8 * 2)) | (2U << (9 * 2)));
+    GPIOA->MODER |=  ((2U << (8 * 2)) | (2U << (9 * 2)));  // AF mode
  80001f4:	4b12      	ldr	r3, [pc, #72]	@ (8000240 <GPIO_Encoder_Init+0x68>)
  80001f6:	681b      	ldr	r3, [r3, #0]
  80001f8:	4a11      	ldr	r2, [pc, #68]	@ (8000240 <GPIO_Encoder_Init+0x68>)
  80001fa:	f443 2320 	orr.w	r3, r3, #655360	@ 0xa0000
  80001fe:	6013      	str	r3, [r2, #0]
 
-    /* AF1 → TIM1 */
-    GPIOA->AFR[1] &= ~((0xF << 0) | (0xF << 4));
+    /* Select Alternate Function 1 (AF1) for PA8 and PA9
+       AF1 connects pins to TIM1_CH1 and TIM1_CH2 */
+    GPIOA->AFR[1] &= ~((0xF << 0) | (0xF << 4));  // Clear AF bits
  8000200:	4b0f      	ldr	r3, [pc, #60]	@ (8000240 <GPIO_Encoder_Init+0x68>)
  8000202:	6a5b      	ldr	r3, [r3, #36]	@ 0x24
  8000204:	4a0e      	ldr	r2, [pc, #56]	@ (8000240 <GPIO_Encoder_Init+0x68>)
  8000206:	f023 03ff 	bic.w	r3, r3, #255	@ 0xff
  800020a:	6253      	str	r3, [r2, #36]	@ 0x24
-    GPIOA->AFR[1] |=  ((1 << 0) | (1 << 4));
+    GPIOA->AFR[1] |=  ((1 << 0) | (1 << 4));      // AF1 = TIM1
  800020c:	4b0c      	ldr	r3, [pc, #48]	@ (8000240 <GPIO_Encoder_Init+0x68>)
  800020e:	6a5b      	ldr	r3, [r3, #36]	@ 0x24
  8000210:	4a0b      	ldr	r2, [pc, #44]	@ (8000240 <GPIO_Encoder_Init+0x68>)
  8000212:	f043 0311 	orr.w	r3, r3, #17
  8000216:	6253      	str	r3, [r2, #36]	@ 0x24
 
-    /* Internal Pull-ups (MANDATORY for KY-040) */
-    GPIOA->PUPDR &= ~((3U << (8 * 2)) | (3U << (9 * 2)));
+    /* Enable internal pull-up resistors
+       - KY-040 is a mechanical encoder
+       - Pull-ups prevent floating inputs and noise */
+    GPIOA->PUPDR &= ~((3U << (8 * 2)) | (3U << (9 * 2))); // Clear PUPD
  8000218:	4b09      	ldr	r3, [pc, #36]	@ (8000240 <GPIO_Encoder_Init+0x68>)
  800021a:	68db      	ldr	r3, [r3, #12]
  800021c:	4a08      	ldr	r2, [pc, #32]	@ (8000240 <GPIO_Encoder_Init+0x68>)
  800021e:	f423 2370 	bic.w	r3, r3, #983040	@ 0xf0000
  8000222:	60d3      	str	r3, [r2, #12]
-    GPIOA->PUPDR |=  ((1U << (8 * 2)) | (1U << (9 * 2)));
+    GPIOA->PUPDR |=  ((1U << (8 * 2)) | (1U << (9 * 2))); // Pull-up
  8000224:	4b06      	ldr	r3, [pc, #24]	@ (8000240 <GPIO_Encoder_Init+0x68>)
  8000226:	68db      	ldr	r3, [r3, #12]
  8000228:	4a05      	ldr	r2, [pc, #20]	@ (8000240 <GPIO_Encoder_Init+0x68>)
@@ -145,12 +150,15 @@ void GPIO_Encoder_Init(void)
  8000240:	40020000 	.word	0x40020000
 
 08000244 <TIM1_Encoder_Init>:
-
-/* ================= TIM1 ENCODER INIT ================= */
+- Counts quadrature signals directly in hardware
+- Encoder Mode 3 = X4 decoding (maximum resolution)
+===============================================================================
+*/
 void TIM1_Encoder_Init(void)
 {
  8000244:	b480      	push	{r7}
  8000246:	af00      	add	r7, sp, #0
+    /* Enable TIM1 peripheral clock */
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
  8000248:	4b24      	ldr	r3, [pc, #144]	@ (80002dc <TIM1_Encoder_Init+0x98>)
  800024a:	6c5b      	ldr	r3, [r3, #68]	@ 0x44
@@ -158,6 +166,7 @@ void TIM1_Encoder_Init(void)
  800024e:	f043 0301 	orr.w	r3, r3, #1
  8000252:	6453      	str	r3, [r2, #68]	@ 0x44
 
+    /* Reset control register and counter */
     TIM1->CR1 = 0;
  8000254:	4b22      	ldr	r3, [pc, #136]	@ (80002e0 <TIM1_Encoder_Init+0x9c>)
  8000256:	2200      	movs	r2, #0
@@ -167,22 +176,28 @@ void TIM1_Encoder_Init(void)
  800025c:	2200      	movs	r2, #0
  800025e:	625a      	str	r2, [r3, #36]	@ 0x24
 
-    /* Encoder Mode 3 (x4 decoding) */
-    TIM1->SMCR &= ~TIM_SMCR_SMS;
+    Mode 3 counts:
+    - Rising + Falling edges of Channel A
+    - Rising + Falling edges of Channel B
+    */
+    TIM1->SMCR &= ~TIM_SMCR_SMS;                       // Clear SMS bits
  8000260:	4b1f      	ldr	r3, [pc, #124]	@ (80002e0 <TIM1_Encoder_Init+0x9c>)
  8000262:	689b      	ldr	r3, [r3, #8]
  8000264:	4a1e      	ldr	r2, [pc, #120]	@ (80002e0 <TIM1_Encoder_Init+0x9c>)
  8000266:	f023 0307 	bic.w	r3, r3, #7
  800026a:	6093      	str	r3, [r2, #8]
-    TIM1->SMCR |=  TIM_SMCR_SMS_0 | TIM_SMCR_SMS_1;
+    TIM1->SMCR |=  TIM_SMCR_SMS_0 | TIM_SMCR_SMS_1;    // SMS = 011 (Mode 3)
  800026c:	4b1c      	ldr	r3, [pc, #112]	@ (80002e0 <TIM1_Encoder_Init+0x9c>)
  800026e:	689b      	ldr	r3, [r3, #8]
  8000270:	4a1b      	ldr	r2, [pc, #108]	@ (80002e0 <TIM1_Encoder_Init+0x9c>)
  8000272:	f043 0303 	orr.w	r3, r3, #3
  8000276:	6093      	str	r3, [r2, #8]
-
-    /* CC1 & CC2 as inputs */
-    TIM1->CCMR1 &= ~(TIM_CCMR1_CC1S | TIM_CCMR1_CC2S);
+    ---------------------------------------------------------------------------
+    CC1 and CC2 are configured as inputs
+    CC1 ← TI1 (Channel A)
+    CC2 ← TI2 (Channel B)
+    */
+    TIM1->CCMR1 &= ~(TIM_CCMR1_CC1S | TIM_CCMR1_CC2S); // Clear CCxS
  8000278:	4b19      	ldr	r3, [pc, #100]	@ (80002e0 <TIM1_Encoder_Init+0x9c>)
  800027a:	699b      	ldr	r3, [r3, #24]
  800027c:	4a18      	ldr	r2, [pc, #96]	@ (80002e0 <TIM1_Encoder_Init+0x9c>)
@@ -196,22 +211,28 @@ void TIM1_Encoder_Init(void)
  800028e:	f443 7380 	orr.w	r3, r3, #256	@ 0x100
  8000292:	f043 0301 	orr.w	r3, r3, #1
  8000296:	6193      	str	r3, [r2, #24]
-
-    /* Input filter (strong debounce for KY-040) */
-    TIM1->CCMR1 |= (6 << TIM_CCMR1_IC1F_Pos);
+    ICxF = 6:
+    - Sampling frequency = fCK_INT / 32
+    - 8 consecutive samples required
+    - Strong debounce suitable for mechanical encoders
+    */
+    TIM1->CCMR1 |= (6 << TIM_CCMR1_IC1F_Pos);  // Filter for Channel A
  8000298:	4b11      	ldr	r3, [pc, #68]	@ (80002e0 <TIM1_Encoder_Init+0x9c>)
  800029a:	699b      	ldr	r3, [r3, #24]
  800029c:	4a10      	ldr	r2, [pc, #64]	@ (80002e0 <TIM1_Encoder_Init+0x9c>)
  800029e:	f043 0360 	orr.w	r3, r3, #96	@ 0x60
  80002a2:	6193      	str	r3, [r2, #24]
-    TIM1->CCMR1 |= (6 << TIM_CCMR1_IC2F_Pos);
+    TIM1->CCMR1 |= (6 << TIM_CCMR1_IC2F_Pos);  // Filter for Channel B
  80002a4:	4b0e      	ldr	r3, [pc, #56]	@ (80002e0 <TIM1_Encoder_Init+0x9c>)
  80002a6:	699b      	ldr	r3, [r3, #24]
  80002a8:	4a0d      	ldr	r2, [pc, #52]	@ (80002e0 <TIM1_Encoder_Init+0x9c>)
  80002aa:	f443 43c0 	orr.w	r3, r3, #24576	@ 0x6000
  80002ae:	6193      	str	r3, [r2, #24]
-
-    /* Rising edge */
+    INPUT POLARITY
+    ---------------------------------------------------------------------------
+    CCxP = 0 → Rising edge reference
+    Polarity still matters for direction interpretation even in X4 mode
+    */
     TIM1->CCER &= ~(TIM_CCER_CC1P | TIM_CCER_CC2P);
  80002b0:	4b0b      	ldr	r3, [pc, #44]	@ (80002e0 <TIM1_Encoder_Init+0x9c>)
  80002b2:	6a1b      	ldr	r3, [r3, #32]
@@ -219,11 +240,13 @@ void TIM1_Encoder_Init(void)
  80002b6:	f023 0322 	bic.w	r3, r3, #34	@ 0x22
  80002ba:	6213      	str	r3, [r2, #32]
 
+    /* Set maximum counter range (16-bit) */
     TIM1->ARR = 0xFFFF;
  80002bc:	4b08      	ldr	r3, [pc, #32]	@ (80002e0 <TIM1_Encoder_Init+0x9c>)
  80002be:	f64f 72ff 	movw	r2, #65535	@ 0xffff
  80002c2:	62da      	str	r2, [r3, #44]	@ 0x2c
 
+    /* Enable the timer (start encoder counting) */
     TIM1->CR1 |= TIM_CR1_CEN;
  80002c4:	4b06      	ldr	r3, [pc, #24]	@ (80002e0 <TIM1_Encoder_Init+0x9c>)
  80002c6:	681b      	ldr	r3, [r3, #0]
@@ -240,18 +263,22 @@ void TIM1_Encoder_Init(void)
  80002e0:	40010000 	.word	0x40010000
 
 080002e4 <main>:
-
-/* ================= MAIN ================= */
+- Converts raw X4 counts into logical steps
+- Limits value between 0 and 20
+===============================================================================
+*/
 int main(void)
 {
  80002e4:	b580      	push	{r7, lr}
  80002e6:	b082      	sub	sp, #8
  80002e8:	af00      	add	r7, sp, #0
+    /* Initialize GPIO and Timer for encoder */
     GPIO_Encoder_Init();
  80002ea:	f7ff ff75 	bl	80001d8 <GPIO_Encoder_Init>
     TIM1_Encoder_Init();
  80002ee:	f7ff ffa9 	bl	8000244 <TIM1_Encoder_Init>
 
+    /* Store initial counter value */
     last_cnt = TIM1->CNT;
  80002f2:	4b1b      	ldr	r3, [pc, #108]	@ (8000360 <main+0x7c>)
  80002f4:	6a5b      	ldr	r3, [r3, #36]	@ 0x24
@@ -261,10 +288,15 @@ int main(void)
 
     while (1)
     {
+        /* Read current encoder count */
         uint16_t curr_cnt = TIM1->CNT;
  80002fc:	4b18      	ldr	r3, [pc, #96]	@ (8000360 <main+0x7c>)
  80002fe:	6a5b      	ldr	r3, [r3, #36]	@ 0x24
  8000300:	80fb      	strh	r3, [r7, #6]
+
+        /* Calculate difference since last read
+           Positive → Clockwise
+           Negative → Counter-Clockwise */
         int16_t diff = curr_cnt - last_cnt;
  8000302:	4b18      	ldr	r3, [pc, #96]	@ (8000364 <main+0x80>)
  8000304:	881b      	ldrh	r3, [r3, #0]
@@ -273,7 +305,10 @@ int main(void)
  800030a:	b29b      	uxth	r3, r3
  800030c:	80bb      	strh	r3, [r7, #4]
 
-        /* 4 counts = 1 physical click (KY-040) */
+        So:
+        +4 → One step forward
+        -4 → One step backward
+        */
         if (diff >= 4)
  800030e:	f9b7 3004 	ldrsh.w	r3, [r7, #4]
  8000312:	2b03      	cmp	r3, #3
@@ -294,7 +329,7 @@ int main(void)
  800032a:	4b0f      	ldr	r3, [pc, #60]	@ (8000368 <main+0x84>)
  800032c:	701a      	strb	r2, [r3, #0]
 
-            last_cnt = curr_cnt;
+            last_cnt = curr_cnt;  // Update reference
  800032e:	4a0d      	ldr	r2, [pc, #52]	@ (8000364 <main+0x80>)
  8000330:	88fb      	ldrh	r3, [r7, #6]
  8000332:	8013      	strh	r3, [r2, #0]
@@ -320,7 +355,7 @@ int main(void)
  8000354:	4b04      	ldr	r3, [pc, #16]	@ (8000368 <main+0x84>)
  8000356:	701a      	strb	r2, [r3, #0]
 
-            last_cnt = curr_cnt;
+            last_cnt = curr_cnt;  // Update reference
  8000358:	4a02      	ldr	r2, [pc, #8]	@ (8000364 <main+0x80>)
  800035a:	88fb      	ldrh	r3, [r7, #6]
  800035c:	8013      	strh	r3, [r2, #0]
