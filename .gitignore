@@ -1,1 +1,60 @@
 /Libraries/
+
+# =========================
+# Build folders
+# =========================
+**/Debug/
+**/Release/
+**/build/
+
+# =========================
+# Generated object files
+# =========================
+**/*.o
+**/*.d
+**/*.su
+**/*.cyclo
+**/*.list
+
+# =========================
+# Executables / binaries
+# =========================
+**/*.elf
+**/*.bin
+**/*.hex
+**/*.map
+
+# =========================
+# Make system generated
+# =========================
+**/makefile
+**/sources.mk
+**/objects.mk
+**/objects.list
+**/subdir.mk
+
+# =========================
+# IDE settings (optional — see note)
+# =========================
+**/.settings/
+**/*.launch
+
+# =========================
+# Eclipse / CubeIDE metadata
+# =========================
+.metadata/
+.recommenders/
+
+# =========================
+# Temporary files
+# =========================
+*.log
+*.tmp
+*.bak
+*.swp
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db

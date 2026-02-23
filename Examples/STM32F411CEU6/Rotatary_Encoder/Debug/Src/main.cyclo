@@ -1,3 +1,0 @@
-../Src/main.c:40:6:GPIO_Encoder_Init	1
-../Src/main.c:72:6:TIM1_Encoder_Init	1
-../Src/main.c:146:5:main	5
