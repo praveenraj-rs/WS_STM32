@@ -118,14 +118,9 @@ int main(void)
             if (raw_rpm > 6000) raw_rpm = 6000;
 
             // Light low-pass filter
-            rpm_display = (rpm_display * 7 + raw_rpm * 3) / 100;
+            rpm_display = (rpm_display * 7 + raw_rpm * 3) / 10;
 
             rpm_timer_ms = 0;
         }
-
-        /*
-         * rpm_display now contains final RPM value
-         * (Use it for LCD / UART / CAN / control loop)
-         */
     }
 }
