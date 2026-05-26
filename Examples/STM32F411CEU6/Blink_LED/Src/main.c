@@ -4,17 +4,18 @@
 
 #define SysClk 16000000U 	// 16MHz HSI system clock frequency
 
-#define LED 13U 			// PC13 Built-in LED
+#define LED_PORT GPIOA
+#define LED 5U 			// PC13 Built-in LED
 #define BTN 0U 				// PA0 push-BTN active low
 
 void LED_GPIO_Init(void)
 {
-	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN; 	// Enable GPIOC clock
-	GPIOC->MODER &= ~(3U << (LED * 2));	// Clear register
-	GPIOC->MODER |=  (1U << (LED * 2));  	// 01: Output mode
-	GPIOC->OTYPER &= ~(1U << LED);		// Push-pull
-	GPIOC->PUPDR &= ~(3U << (LED * 2));	// No pull-up or pull-down
-	GPIOC->ODR |= (1<<LED);				// LED off
+	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN; 	// Enable LED_PORT clock
+	LED_PORT->MODER &= ~(3U << (LED * 2));	// Clear register
+	LED_PORT->MODER |=  (1U << (LED * 2));  	// 01: Output mode
+	LED_PORT->OTYPER &= ~(1U << LED);		// Push-pull
+	LED_PORT->PUPDR &= ~(3U << (LED * 2));	// No pull-up or pull-down
+	LED_PORT->ODR |= (1<<LED);				// LED off
 }
 
 void BTN_GPIO_Init(void)
@@ -54,7 +55,7 @@ int main(void)
 
 	while (1)
 	{
-		GPIOC->ODR ^= (1<<LED);	    // LED OFF
+		LED_PORT->ODR ^= (1<<LED);	    // LED OFF
 		TIM3_Delay_ms(500);			// Delay
 	}
 }
